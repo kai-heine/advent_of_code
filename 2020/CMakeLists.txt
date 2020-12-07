@@ -13,3 +13,4 @@ endif()
 find_package(fmt CONFIG REQUIRED)
 
 add_subdirectory(01)
+add_subdirectory(02)

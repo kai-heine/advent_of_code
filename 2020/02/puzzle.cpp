@@ -21,16 +21,30 @@ bool validate_old_policies(password_policy policy, std::string_view password) {
     return (letter_amount >= policy.first_number) && (letter_amount <= policy.second_number);
 }
 
-bool test1() {
-    std::array<std::pair<password_policy, std::string_view>, 3> test_input{{
-        {{1, 3, 'a'}, "abcde"},
-        {{1, 3, 'b'}, "cdefg"},
-        {{2, 9, 'c'}, "ccccccccc"},
-    }};
+bool validate_toboggan_policies(password_policy policy, std::string_view password) {
+    auto contains_letter_at = [&](std::size_t position) {
+        return password.at(position - 1) == policy.letter;
+    };
 
+    return contains_letter_at(policy.first_number) != contains_letter_at(policy.second_number);
+}
+
+constexpr std::array<std::pair<password_policy, std::string_view>, 3> test_input{{
+    {{1, 3, 'a'}, "abcde"},
+    {{1, 3, 'b'}, "cdefg"},
+    {{2, 9, 'c'}, "ccccccccc"},
+}};
+
+bool test1() {
     return ranges::count_if(test_input, [](auto entry) {
                return validate_old_policies(entry.first, entry.second);
            }) == 2;
+}
+
+bool test2() {
+    return ranges::count_if(test_input, [](auto entry) {
+               return validate_toboggan_policies(entry.first, entry.second);
+           }) == 1;
 }
 
 auto parse_input(fs::path file) {
@@ -57,7 +71,7 @@ auto parse_input(fs::path file) {
         }
 
         policy.letter = *begin;
-        begin += 2;
+        begin += 3;
 
         entries.emplace_back(policy, std::string(begin, end));
     }
@@ -66,7 +80,7 @@ auto parse_input(fs::path file) {
 }
 
 int main() {
-    auto input = parse_input("./input");
+    auto const input = parse_input("./input");
 
     fmt::print("*** Puzzle 1\n");
 
@@ -79,5 +93,18 @@ int main() {
 
     fmt::print("Number of valid passwords: {}\n", ranges::count_if(input, [](auto entry) {
                    return validate_old_policies(entry.first, entry.second);
+               }));
+
+    fmt::print("\n*** Puzzle 2\n");
+
+    if (test2()) {
+        fmt::print("Test passed!\n");
+    } else {
+        fmt::print("Test not passed\n");
+        std::exit(-1);
+    }
+
+    fmt::print("Number of valid passwords: {}\n", ranges::count_if(input, [](auto entry) {
+                   return validate_toboggan_policies(entry.first, entry.second);
                }));
 }

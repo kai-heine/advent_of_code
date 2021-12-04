@@ -1,4 +1,4 @@
-use std::{io, path::Path};
+use std::{io, path::Path, vec};
 
 fn read_lines<P>(path: P) -> io::Result<Vec<String>>
 where
@@ -52,6 +52,69 @@ fn puzzle1(lines: &[String]) -> u32 {
     power_consumption
 }
 
+fn to_uints(lines: &[String]) -> Vec<u32> {
+    lines
+        .iter()
+        .map(|s| {
+            s.chars().fold(0, |acc, c| match c {
+                '0' => acc << 1,
+                '1' => (acc << 1) | 1,
+                _ => panic!("unexpected bit!"),
+            })
+        })
+        .collect()
+}
+
+fn partition_least_most_common(report: &[u32], bit_index: usize) -> (Vec<u32>, Vec<u32>) {
+    let (ones, zeros): (Vec<_>, Vec<_>) = report
+        .iter()
+        .partition(|&value| (value & (1 << bit_index)) != 0);
+
+    if ones.len() >= zeros.len() {
+        (zeros, ones)
+    } else {
+        (ones, zeros)
+    }
+}
+
+fn filter_most_common(report: &[u32], bit_index: usize) -> Vec<u32> {
+    let (_, most_common) = partition_least_most_common(&report, bit_index);
+    most_common
+}
+
+fn filter_least_common(report: &[u32], bit_index: usize) -> Vec<u32> {
+    let (least_common, _) = partition_least_most_common(&report, bit_index);
+    least_common
+}
+
+fn puzzle2(diagnostic_report: &[u32], bit_width: usize) -> u32 {
+    // i'm stuck trying to work with Vec<String>, so let's use actual bits (why didn't i do that in the first place?)
+
+    let mut least_common = diagnostic_report.to_vec();
+    let mut most_common = diagnostic_report.to_vec();
+
+    for bit_index in (0..bit_width).rev() {
+        most_common = filter_most_common(&most_common, bit_index);
+        if most_common.len() == 1 {
+            break;
+        }
+    }
+
+    for bit_index in (0..bit_width).rev() {
+        least_common = filter_least_common(&least_common, bit_index);
+        if least_common.len() == 1 {
+            break;
+        }
+    }
+
+    let oxygen_generator_rating = most_common.first().unwrap();
+    let co2_scrubber_rating = least_common.first().unwrap();
+
+    let life_support_rating = oxygen_generator_rating * co2_scrubber_rating;
+
+    life_support_rating
+}
+
 pub fn day03() {
     println!("\nDay 3:");
     let lines = read_lines("./inputs/day03").expect("could not read input!");
@@ -61,6 +124,13 @@ pub fn day03() {
     println!(
         "The power consumption of the submarine is {}",
         power_consumption
+    );
+
+    println!("Puzzle 1:");
+    let life_support_rating = puzzle2(&to_uints(&lines), lines.first().unwrap().len());
+    println!(
+        "The life support rating of the submarine is {}",
+        life_support_rating
     );
 }
 
@@ -80,5 +150,14 @@ mod tests {
         let example_input: Vec<String> = EXAMPLE_INPUT.iter().map(|&s| s.into()).collect();
         let power_consumption = puzzle1(&example_input);
         assert_eq!(power_consumption, 198);
+    }
+
+    #[test]
+    fn puzzle2_example() {
+        let example_input_str: Vec<String> = EXAMPLE_INPUT.iter().map(|&s| s.into()).collect();
+        let example_input = to_uints(&example_input_str);
+
+        let life_support_rating = puzzle2(&example_input, 5);
+        assert_eq!(life_support_rating, 230);
     }
 }

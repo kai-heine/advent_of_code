@@ -48,20 +48,9 @@ fn visit_cave(
     }
 
     completed_paths
-    // return: vec of vec of visited caves? optional? none if no valid path?
 }
 
 fn puzzle1(input: &str) -> usize {
-    // create a list of caves as nodes
-    // every node has links to other nodes
-    // every node has a status (big, small, already visited)
-    // start at the start node
-    // for every linked node:
-    // go to that node
-    // if small and already visited: stop, invalid path
-    // else: repeat until end node reached
-    // keep track of visited nodes on path
-
     let mut caves: HashMap<String, Cave> = HashMap::new();
     for line in input.lines() {
         let (start, end) = line.split_once('-').unwrap();

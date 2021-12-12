@@ -107,7 +107,7 @@ fn puzzle2(input: &str) -> usize {
 }
 
 pub fn day11() {
-    println!("\nDay 9:");
+    println!("\nDay 11:");
 
     println!("Puzzle 1:");
     let total_flashes = puzzle1(INPUT, 100);

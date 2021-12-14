@@ -13,6 +13,7 @@ mod day10;
 mod day11;
 mod day12;
 mod day13;
+mod day14;
 
 fn main() {
     println!("Advent of Code 2021\n");
@@ -31,6 +32,7 @@ fn main() {
         day11::day11,
         day12::day12,
         day13::day13,
+        day14::day14,
     ];
 
     let mut days_to_run: Vec<usize> = env::args()
